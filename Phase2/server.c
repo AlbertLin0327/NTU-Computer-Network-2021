@@ -1,11 +1,12 @@
 // C program for the Server Side
 // Socket API file
-#include "socket-api.c"
+#include "server-api.c"
 
-#define THREAD_NUM 1024
 server svr;  // server
-pthread_t threadsArr[THREAD_NUM];  // pthread array
-bool threadsUsed[THREAD_NUM]; // pthread array in used
+pthread_t threadsArr[MAX_CONN_FD];  // pthread array
+User userList[MAX_CONN_FD];  // user list
+bool threadsUsed[MAX_CONN_FD]; // pthread array in used
+
 
 // Initialize Server
 static void init_server(unsigned short port) {
@@ -36,30 +37,42 @@ static void init_server(unsigned short port) {
     return;
 }
 
+// Initialized user list
+static void init_userList() {
+
+    for (int i = 0; i < MAX_CONN_FD; i++)
+        init_user(&userList[i]);
+    
+    // initialized server
+    userList[svr.listen_fd].conn_fd = svr.listen_fd;
+    strcpy(userList[svr.listen_fd].username, "server");
+
+    return;
+}
+
 void* pthread_handler(void* data) {
 
     // retrieve thread id
     int thread_id = (int) data;
 
-    printf("%d\n", thread_id);
+    printf("ACCEPT %d\n", thread_id);
 
-    sleep(10);
-    
+
+    while (true) {
+        switch (userList[thread_id].state) {
+            case LOGIN:
+                login(&userList[thread_id]);
+                break;
+
+            default:
+                break;
+        }
+    }
 
     // end pthread
     threadsUsed[thread_id] = false;
-    pthread_exit(NULL); // 離開子執行緒
+    pthread_exit(NULL);
 }
-
-int nextThread() {
-    for (int i = 0; i < THREAD_NUM; i++) {
-        if (!threadsUsed[i])
-            return i;
-    }
-
-    return 0;
-}
-
 
 // Driver Code
 int main(int argc, char** argv) {
@@ -78,13 +91,17 @@ int main(int argc, char** argv) {
         clilen = sizeof(cliaddr);
         conn_fd = accept(svr.listen_fd, (struct sockaddr*)&cliaddr, (socklen_t*)&clilen);
 
-        printf("ACCEPT %d\n", conn_fd);
-
         // create new pthread
-        int thread_id = nextThread();
-        threadsUsed[thread_id] = true;
-        pthread_create(&threadsArr[thread_id++], NULL, pthread_handler, (void *) thread_id);
+        threadsUsed[conn_fd] = true;
 
+        // assign user information
+        init_user(&userList[conn_fd]);
+        userList[conn_fd].conn_fd = conn_fd;
+        userList[conn_fd].state = LOGIN;
+
+        int param = conn_fd;
+
+        pthread_create(&threadsArr[conn_fd++], NULL, pthread_handler, (void *) (uintptr_t) param);
 	}
 
 	return 0;

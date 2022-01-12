@@ -1,99 +1,74 @@
-// C program for the Client Side
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
+// Socket API file
+#include "socket-api.c"
 
-// inet_addr
-#include <arpa/inet.h>
-#include <unistd.h>
+server svr; // server
+User user;
 
-// For threading, link with lpthread
-#include <pthread.h>
-#include <semaphore.h>
+// initailize a server, exit for error
+static void init_server(server* svr, unsigned short port, char* IPv4_address) {
 
-// Function to send data to
-// server socket.
-void* clienthread(void* args)
-{
+    // defined in <netinet/in.h>
+    struct sockaddr_in servaddr;
+    int tmp;
 
-	int client_request = *((int*)args);
-	int network_socket;
+    // get current host and port and record it with svr
+    gethostname(svr->hostname, sizeof(svr->hostname));
+    svr->port = port;
 
-	// Create a stream socket
-	network_socket = socket(AF_INET,
-							SOCK_STREAM, 0);
+    // establish TCP socket
+    svr->listen_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (svr->listen_fd < 0) ERR_EXIT("socket creation failed");
 
-	// Initialise port number and address
-	struct sockaddr_in server_address;
-	server_address.sin_family = AF_INET;
-	server_address.sin_addr.s_addr = INADDR_ANY;
-	server_address.sin_port = htons(8989);
+    // initialized servaddr
+    bzero(&servaddr, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = inet_addr(IPv4_address);
+    servaddr.sin_port = htons(port); // bind to current port
 
-	// Initiate a socket connection
-	int connection_status = connect(network_socket,
-									(struct sockaddr*)&server_address,
-									sizeof(server_address));
+    if (connect(svr->listen_fd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {   
+        ERR_EXIT("Connection Failed");
+    }
 
-	// Check for connection error
-	if (connection_status < 0) {
-		puts("Error\n");
-		return 0;
-	}
-
-	printf("Connection established\n");
-
-	// Send data to the socket
-	send(network_socket, &client_request,
-		sizeof(client_request), 0);
-
-	// Close the connection
-	close(network_socket);
-	pthread_exit(NULL);
-
-	return 0;
+    return;
 }
 
-// Driver Code
-int main()
-{
-	printf("1. Read\n");
-	printf("2. Write\n");
+void login() {
+    char buf[MAX_BUFFER_SIZE];
 
-	// Input
-	int choice;
-	scanf("%d", &choice);
-	pthread_t tid;
+    // receive login message from server
+    bzero(buf, MAX_BUFFER_SIZE);
+    recv(svr.listen_fd, buf, sizeof(buf), 0);
+    printf("%s", buf);
 
-	// Create connection
-	// depending on the input
-	switch (choice) {
-	case 1: {
-		int client_request = 1;
+    // send username to server
+    bzero(buf, MAX_BUFFER_SIZE);
+    scanf("%s", buf);
+    sprintf(user.username, "%s", buf);
+    send(svr.listen_fd, buf, sizeof(buf), 0);
 
-		// Create thread
-		pthread_create(&tid, NULL,
-					clienthread,
-					&client_request);
-		sleep(20);
-		break;
-	}
-	case 2: {
-		int client_request = 2;
+    return;
+}
 
-		// Create thread
-		pthread_create(&tid, NULL,
-					clienthread,
-					&client_request);
-		sleep(20);
-		break;
-	}
-	default:
-		printf("Invalid Input\n");
-		break;
-	}
+int main(int argc, char** argv) {
 
-	// Suspend execution of
-	// calling thread
-	pthread_join(tid, NULL);
+    // Parse args.
+    if (argc != 2) {
+        fprintf(stderr, "usage: %s [ip]:[port]\n", argv[0]);
+        exit(1);
+    }
+
+#ifdef DEBUG
+    fprintf(stderr,"%s\n", argv[1]);
+#endif
+
+    char ip[48];
+    unsigned short port;
+
+    sscanf(argv[1], "%[^:]:%hd", ip, &port);
+
+    // Initialize server
+    init_server(&svr, port, ip);
+
+    // login
+    login();
 }
