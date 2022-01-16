@@ -5,7 +5,7 @@ import IUser from './User';
 const hostname = process.env.REACT_APP_BACKEND_HOSTNAME;
 
 export class NetworkServices {
-  static Login = async (name: string): Promise<string[] | undefined> => {
+  static Login = async (name: string): Promise<string | undefined> => {
     const endpoint = new URL(`/user/${name}`, hostname).href;
     const response = axios.get(endpoint);
     return response

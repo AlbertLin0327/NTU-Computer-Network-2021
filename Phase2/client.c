@@ -129,18 +129,4 @@ int main(int argc, char** argv) {
         printf("%s\n", buffer);
 
     }
-
-    
-
-    // login
-    // login();
-
-    // // process user info
-    // while(true) {
-    //     char command[MAX_BUFFER_SIZE];
-    //     scanf("%s", command);
-
-
-                                                                                                                                                                                                                                                                                                                                       
-    // }
 }

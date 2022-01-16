@@ -18,11 +18,16 @@ class HomePage extends React.Component<{}, HomePageState> {
 
   componentDidMount = async () => {
     const Name = getCookie("name"); 
-    // var friends: string[] | undefined = await NetworkServices.Login(Name);
-    var friends: string[] = ["Hermes", "Dino", ];
-    console.log(Name, friends === undefined ? "ii" : [0]);
+
+    var friends: string | undefined = await NetworkServices.Login(Name);
+    var friendsList: string[] | undefined;
+    if (friends !== undefined) {
+        friendsList = friends.replace('[','').replace(']','').slice(0, -1).split(',');
+        console.log('Hi', Name, friendsList);
+    }
+
     if(friends){
-      this.setState({ Friends: friends });
+      this.setState({ Friends: friendsList });
     }
     this.setState({Name: Name});
   }
@@ -49,6 +54,7 @@ class HomePage extends React.Component<{}, HomePageState> {
       console.log(this.state.Name, friend);
       try {
         await NetworkServices.Deletefriend(this.state.Name, friend);
+
       } catch (e) {
         console.log(e);
       }

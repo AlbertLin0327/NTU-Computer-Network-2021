@@ -71,11 +71,11 @@ char* db_getuserfriend(char username[]){
 
     memset(friends_json, 0, sizeof(friends_json));
     
-    friends_json[0] = '{';
+    friends_json[0] = '[';
     for(int i = 0; i < friends_cnt; i++){
         sprintf(friends_json + strlen(friends_json), "'%s',", friends_list[i]);
     }
-    sprintf(friends_json + strlen(friends_json), "}");
+    sprintf(friends_json + strlen(friends_json), "]");
      
     return friends_json; // Success
 }
@@ -140,11 +140,12 @@ char* db_getusermessage(char username1[], char username2[]){
     }
     
     memset(message_json, 0, sizeof(message_json));
-    message_json[0] = '{';
+    message_json[0] = '[';
     for(int i = 0; i < message_cnt; i++){
         sprintf(message_json + strlen(message_json), "%s", message_list[i]);
+
     }
-    sprintf(message_json + strlen(message_json), "}");
+    sprintf(message_json + strlen(message_json), "]");
      
     return message_json; // Success
 }
