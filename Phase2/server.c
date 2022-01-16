@@ -1,6 +1,7 @@
 // C program for the Server Side
 // Socket API file
 #include "server-api.c"
+#include <string.h>
 
 server svr;  // server
 pthread_t threadsArr[MAX_CONN_FD];  // pthread array
@@ -56,18 +57,54 @@ void* pthread_handler(void* data) {
     int thread_id = (int) data;
 
     printf("ACCEPT %d\n", thread_id);
+    char *msg = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello, world~";
 
+    while(1){
 
-    while (true) {
-        switch (userList[thread_id].state) {
-            case LOGIN:
-                login(&userList[thread_id]);
-                break;
+    char buffer[MAX_BUFFER_SIZE];
+    bzero(buffer, sizeof(buffer));
 
-            default:
-                break;
-        }
+    recv(userList[thread_id].conn_fd, buffer, sizeof(buffer), 0);
+    printf("%s\n", buffer);
+    
+    
+    char ss[MAX_BUFFER_SIZE];
+    
+    sscanf(buffer, "GET /user/%s", ss);
+
+    printf("%s\n", ss);
+
+    if(!db_checkuser(ss)) {
+        db_adduser(ss);
     }
+
+    char *a = db_getuserfriend(ss);
+    printf("%s\n", a);
+    char res[MAX_BUFFER_SIZE];
+    sprintf(res, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s", strlen(a), a);
+    printf("%s\n", res);
+    send(userList[thread_id].conn_fd, res, strlen(res), 0);
+    }
+
+
+    // while (true) {
+    //     switch (userList[thread_id].state) {
+    //         case LOGIN:
+    //             login(&userList[thread_id]);
+    //             break;
+
+    //         case HOMEPAGE:
+    //             homepage(&userList[thread_id]);
+    //             break;
+
+    //         case RETREIVEDHOMEPAGE:
+    //             waiting_homepage(&userList[thread_id]);
+    //             break;
+            
+    //         default:
+    //             break;
+    //     }
+    // }
 
     // end pthread
     threadsUsed[thread_id] = false;
@@ -85,10 +122,14 @@ int main(int argc, char** argv) {
     // // Initialize server
     init_server((unsigned short) atoi(argv[1]));
 
+    // Initialize DB
+    int rc = db_init("database/database.db");
+
 	while (1) {
 
         // Check new connection
         clilen = sizeof(cliaddr);
+        printf("%d", svr.listen_fd);
         conn_fd = accept(svr.listen_fd, (struct sockaddr*)&cliaddr, (socklen_t*)&clilen);
 
         // create new pthread

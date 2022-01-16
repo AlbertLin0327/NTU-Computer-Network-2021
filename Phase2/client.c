@@ -1,23 +1,23 @@
 // Socket API file
 #include "socket-api.c"
 
-server svr; // server
+server svr_browser, svr_cmd, svr_backend;
 User user;
 
 // initailize a server, exit for error
-static void init_server(server* svr, unsigned short port, char* IPv4_address) {
+static void init_backend(unsigned short port, char* IPv4_address) {
 
     // defined in <netinet/in.h>
     struct sockaddr_in servaddr;
     int tmp;
 
     // get current host and port and record it with svr
-    gethostname(svr->hostname, sizeof(svr->hostname));
-    svr->port = port;
+    gethostname(svr_backend.hostname, sizeof(svr_backend.hostname));
+    svr_backend.port = port;
 
     // establish TCP socket
-    svr->listen_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (svr->listen_fd < 0) ERR_EXIT("socket creation failed");
+    svr_backend.listen_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (svr_backend.listen_fd < 0) ERR_EXIT("socket creation failed");
 
     // initialized servaddr
     bzero(&servaddr, sizeof(servaddr));
@@ -25,9 +25,38 @@ static void init_server(server* svr, unsigned short port, char* IPv4_address) {
     servaddr.sin_addr.s_addr = inet_addr(IPv4_address);
     servaddr.sin_port = htons(port); // bind to current port
 
-    if (connect(svr->listen_fd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {   
+    if (connect(svr_backend.listen_fd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {   
         ERR_EXIT("Connection Failed");
     }
+
+    return;
+}
+
+// Initialize Server
+static void init_browser(unsigned short port) {
+    struct sockaddr_in servaddr;
+
+    // Server Configuration
+    gethostname(svr_browser.hostname, sizeof(svr_browser.hostname));
+    svr_browser.port = port;
+
+    // Register for socket
+    svr_browser.listen_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (svr_browser.listen_fd < 0) ERR_EXIT("socket");
+    
+    // configure socket parameters
+    bzero(&servaddr, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    servaddr.sin_port = htons(port);
+
+    // Bind Socket
+    if (bind(svr_browser.listen_fd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0) 
+        ERR_EXIT("bind");
+    
+    // Listen Socket
+    if (listen(svr_browser.listen_fd, 1024) < 0) 
+        ERR_EXIT("listen");
 
     return;
 }
@@ -37,23 +66,27 @@ void login() {
 
     // receive login message from server
     bzero(buf, MAX_BUFFER_SIZE);
-    recv(svr.listen_fd, buf, sizeof(buf), 0);
+    recv(svr_backend.listen_fd, buf, sizeof(buf), 0);
     printf("%s", buf);
 
     // send username to server
     bzero(buf, MAX_BUFFER_SIZE);
     scanf("%s", buf);
     sprintf(user.username, "%s", buf);
-    send(svr.listen_fd, buf, sizeof(buf), 0);
+    send(svr_backend.listen_fd, buf, sizeof(buf), 0);
 
     return;
+}
+
+void homepage() {
+    
 }
 
 int main(int argc, char** argv) {
 
     // Parse args.
-    if (argc != 2) {
-        fprintf(stderr, "usage: %s [ip]:[port]\n", argv[0]);
+    if (argc != 3) {
+        fprintf(stderr, "usage: %s [ip]:[port] [port]\n", argv[0]);
         exit(1);
     }
 
@@ -62,13 +95,52 @@ int main(int argc, char** argv) {
 #endif
 
     char ip[48];
-    unsigned short port;
+    unsigned short port_backend, port_browser;
 
-    sscanf(argv[1], "%[^:]:%hd", ip, &port);
+    sscanf(argv[1], "%[^:]:%hd", ip, &port_backend);
+    sscanf(argv[2], "%hd", &port_browser);
 
-    // Initialize server
-    init_server(&svr, port, ip);
+    printf("%d\n", port_browser);
+
+    // Initialize browser
+    init_browser(port_browser);
+    
+
+    // Initialize backend
+    init_backend(port_backend, ip);
+
+    char buffer[MAX_BUFFER_SIZE];
+
+    while(true) {
+
+        int browser_fd = accept(svr_browser.listen_fd, NULL, NULL);
+        int backend_fd = svr_backend.listen_fd;
+
+        bzero(buffer, MAX_BUFFER_SIZE);
+        recv(browser_fd, buffer, sizeof(buffer), 0);
+        send(backend_fd, buffer, strlen(buffer), 0); 
+
+        printf("%s\n", buffer);
+
+        bzero(buffer, MAX_BUFFER_SIZE);
+        recv(backend_fd, buffer, sizeof(buffer), 0);
+        send(browser_fd, buffer, strlen(buffer), 0);
+
+        printf("%s\n", buffer);
+
+    }
+
+    
 
     // login
-    login();
+    // login();
+
+    // // process user info
+    // while(true) {
+    //     char command[MAX_BUFFER_SIZE];
+    //     scanf("%s", command);
+
+
+                                                                                                                                                                                                                                                                                                                                       
+    // }
 }

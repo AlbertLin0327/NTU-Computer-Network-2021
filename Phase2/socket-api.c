@@ -31,12 +31,13 @@ typedef struct {
     int listen_fd;  // fd to wait for a new connection
 } server;
 
-enum userState {INIT, LOGIN, HOMEPAGE, CHAT};
+enum userState {INIT, LOGIN, HOMEPAGE, RETREIVEDHOMEPAGE, CHAT};
 
 typedef struct {
     int conn_fd;  // fd to talk with client
     char buf[MAX_BUFFER_SIZE];  // data sent by/to client
     char username[MAX_BUFFER_SIZE];
+    char chatting[MAX_BUFFER_SIZE];
     size_t buf_len;  // bytes used by buf
     size_t username_len;
     enum userState state;  // used to record the state of each users

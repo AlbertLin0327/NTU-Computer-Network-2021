@@ -10,6 +10,7 @@ export class NetworkServices {
     const response = axios.get(endpoint);
     return response
       .then((res) => {
+          console.log(res.data);
         return res.data;
       })
       .catch((err) => {
