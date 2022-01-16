@@ -6,10 +6,14 @@
 
 int check_callback(void *NotUsed, int argc, char **argv, char **azColName);
 int getfriend_callback(void *NotUsed, int argc, char **argv, char **azColName);
+int getmessage_callback(void *NotUsed, int argc, char **argv, char **azColName);
 bool called = false;
 
 char friends_list[100][100];
 char friends_json[1000];
+char message_list[100][5][100];
+char message_json[10000];
+int message_cnt = 0;
 int friends_cnt = 0;
 
 sqlite3* db;
@@ -97,6 +101,68 @@ int db_addfriendship(char username1[], char username2[]){
     return 0; // Success
 }
 
+int db_deletefriendship(char username1[], char username2[]){
+    if(!db_checkuser(username1) || !db_checkuser(username2))
+        return 2;
+    char sql[100];
+    char* err_msg = 0;
+    sprintf(sql, "DELETE FROM Friendship WHERE Friend1 = '%s' and Friend2 = '%s';", username2, username1);
+    int rc = sqlite3_exec(db, sql, check_callback, 0, &err_msg);
+    if (rc != SQLITE_OK) {
+        if(rc == SQLITE_CONSTRAINT){
+            return 2; // Duplicate name
+        }else      
+            return 1; // Other error
+    }
+    sprintf(sql, "DELETE FROM Friendship WHERE Friend1 = '%s' and Friend2 = '%s';", username1, username2);
+    rc = sqlite3_exec(db, sql, check_callback, 0, &err_msg);
+    if (rc != SQLITE_OK) {
+        if(rc == SQLITE_CONSTRAINT){
+            return 2; // Duplicate name
+        }else      
+            return 1; // Other error
+    }
+    return 0; 
+}
+
+char* db_getusermessage(char username1[], char username2[]){
+    char sql[500];
+    char* err_msg = 0;
+    sprintf(sql, "SELECT * FROM Message WHERE (sender = '%s' and receiver '%s') or (sender = '%s' and receiver '%s');", username1, username2, username2, username1);
+    message_cnt = 0;
+    int rc = sqlite3_exec(db, sql, getmessage_callback, 0, &err_msg);
+
+    if (rc != SQLITE_OK || message_cnt == 0) {
+        return ""; // No friend
+    }
+
+    message_json[0] = '{';
+    for(int i = 0; i < friends_cnt; i++){
+        sprintf(friends_json + strlen(friends_json), "'%s',", friends_list[i]);
+    }
+    sprintf(message_json + strlen(message_json), "}");
+     
+    return message_json; // Success
+}
+
+
+
+int db_addmessage(char sender[], char receiver[], int type, char content[]){
+    if(!db_checkuser(sender) || !db_checkuser(receiver))
+        return 2;
+    char sql[1000];
+    char* err_msg = 0;
+    sprintf(sql, "INSERT INTO Message VALUES(NULL, '%s', '%s', %d, '%s');", sender, receiver, type, content);
+    int rc = sqlite3_exec(db, sql, check_callback, 0, &err_msg);
+    if (rc != SQLITE_OK) {
+        if(rc == SQLITE_CONSTRAINT){
+            return 2; // Duplicate name
+        }else      
+            return 1; // Other error
+    }
+    return 0; 
+}
+
 int check_callback(void *NotUsed, int argc, char **argv, char **azColName) {
     called = true;
     return 0;
@@ -109,12 +175,18 @@ int getfriend_callback(void *NotUsed, int argc, char **argv, char **azColName) {
     return 0;
 }
 
+int getmessage_callback(void *NotUsed, int argc, char **argv, char **azColName) {
+    sprintf(friends_list[friends_cnt], "%s", argv[0]);
+    friends_cnt++;
+    printf("%s\n", friends_list[friends_cnt - 1]);
+    return 0;
+}
 
-// int main(void) {
-//     int rc = db_init("database.db");
-//     printf(db_checkuser("dinoo") ? "yes\n" : "NO\n");
-//     printf("%d\n", db_addfriendship("Hermes", "Dino"));
-//     printf("%d\n", db_addfriendship("Albert", "Dino"));
-//     printf("%d\n", db_addfriendship("Dino", "Hermes"));
-//     return 0;
-// }
+int main(void) {
+    int rc = db_init("database.db");
+    printf(db_checkuser("dinoo") ? "yes\n" : "NO\n");
+    // printf("%d\n", db_deletefriendship("Albert", "Dino"));
+    printf("%d\n", db_addfriendship("H", "Dino"));
+    printf("%d\n", db_addfriendship("Dino", "Hermes"));
+    return 0;
+}
