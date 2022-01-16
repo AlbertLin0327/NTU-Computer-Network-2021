@@ -26,9 +26,9 @@ class HomePage extends React.Component<{}, HomePageState> {
         console.log('Hi', Name, friendsList);
     }
 
-    if(friends){
-      this.setState({ Friends: friendsList });
-    }
+    // if(friends){
+    this.setState({ Friends: friendsList });
+    // }
     this.setState({Name: Name});
   }
 
@@ -42,9 +42,9 @@ class HomePage extends React.Component<{}, HomePageState> {
         console.log('Hi', Name, friendsList);
     }
 
-    if(friends){
-      this.setState({ Friends: friendsList });
-    }
+    // if(friends){
+    this.setState({ Friends: friendsList });
+    // }
     this.setState({Name: Name});
   }
   
