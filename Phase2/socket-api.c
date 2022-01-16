@@ -21,7 +21,7 @@
 // error handling and excit
 #define ERR_EXIT(a) do { perror(a); exit(1); } while(0)
 
-#define MAX_BUFFER_SIZE 1024
+#define MAX_BUFFER_SIZE 8192
 #define MAX_CONN_FD 1024
 #define MAX_LENGTH 256
 

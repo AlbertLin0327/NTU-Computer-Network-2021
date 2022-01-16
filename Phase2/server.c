@@ -7,6 +7,7 @@ server svr;  // server
 pthread_t threadsArr[MAX_CONN_FD];  // pthread array
 User userList[MAX_CONN_FD];  // user list
 bool threadsUsed[MAX_CONN_FD]; // pthread array in used
+char buffer[1<<20];
 
 
 // Initialize Server
@@ -61,11 +62,38 @@ void* pthread_handler(void* data) {
 
     while(1){
 
-        char buffer[MAX_BUFFER_SIZE];
+        char tmp_buf[MAX_BUFFER_SIZE];
         bzero(buffer, sizeof(buffer));
-
-        recv(userList[thread_id].conn_fd, buffer, sizeof(buffer), 0);
+        bzero(tmp_buf, sizeof(tmp_buf));
         
+
+        bool first_pkt = true;
+        int total_len = 0;  
+
+        do{
+            // first pkt
+            int readlen = recv(userList[thread_id].conn_fd, tmp_buf, sizeof(tmp_buf), 0);
+            printf("%s\n", tmp_buf);
+            
+            // find length
+            if (first_pkt && !strncmp(tmp_buf, "POST", 4)) {
+                char* content_len = strstr(tmp_buf, "Content-Length: ") + 15;
+                char* content = strstr(tmp_buf, "\r\n\r\n") + 4;
+                
+                sscanf(content_len, "%d", &total_len);
+                printf("%d %d\n", total_len, strlen(content));
+
+                total_len -= strlen(content);
+
+            } else total_len -= readlen;
+
+            first_pkt = false;
+
+            printf("%d\n", total_len);
+            strcat(buffer, tmp_buf);
+           
+        } while(total_len > 0);
+
 
         if (!strncmp(buffer, "GET /user/", 10)) {
             char username[MAX_BUFFER_SIZE];
@@ -73,7 +101,26 @@ void* pthread_handler(void* data) {
 
             login(&userList[thread_id], username);
         
-        } 
+        } else if (!strncmp(buffer, "POST /user/delete/", 18)) {
+            char username[MAX_BUFFER_SIZE];
+            sscanf(buffer, "POST /user/delete/%s", username);
+
+            char* deleteName = strstr(buffer, "\r\n\r\n") + 4;
+
+            printf("%s\n", deleteName);
+
+            deleteFriend(&userList[thread_id], username, deleteName);
+        
+        } else if (!strncmp(buffer, "POST /user/add/", 15)) {
+            char username[MAX_BUFFER_SIZE];
+            sscanf(buffer, "POST /user/add/%s", username);
+
+            char* friendName = strstr(buffer, "\r\n\r\n") + 4;
+
+            printf("%s\n", friendName);
+
+            addFriend(&userList[thread_id], username, friendName);
+        }
 
         
     }

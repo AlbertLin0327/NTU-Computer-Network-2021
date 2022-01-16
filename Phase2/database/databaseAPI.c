@@ -73,7 +73,7 @@ char* db_getuserfriend(char username[]){
     
     friends_json[0] = '[';
     for(int i = 0; i < friends_cnt; i++){
-        sprintf(friends_json + strlen(friends_json), "'%s',", friends_list[i]);
+        sprintf(friends_json + strlen(friends_json), "%s,", friends_list[i]);
     }
     sprintf(friends_json + strlen(friends_json), "]");
      
@@ -186,10 +186,10 @@ int getmessage_callback(void *NotUsed, int argc, char **argv, char **azColName) 
     return 0;
 }
 
-int main(void) {
-    int rc = db_init("database.db");
-    // printf("%d\n", db_addmessage("Dino", "Hermes", 1, "Good night"));
-    // printf("%s\n", db_getusermessage("Dino", "Hermes"));
-    printf("%s\n", db_getusermessage("Dino", "Hermes"));
-    return 0;
-}
+// int main(void) {
+//     int rc = db_init("database.db");
+//     // printf("%d\n", db_addmessage("Dino", "Hermes", 1, "Good night"));
+//     // printf("%s\n", db_getusermessage("Dino", "Hermes"));
+//     printf("%s\n", db_getusermessage("Dino", "Hermes"));
+//     return 0;
+// }

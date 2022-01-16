@@ -15,19 +15,85 @@ void login(User* user, char* username) {
 
     char *friendList = db_getuserfriend(username);
 
-#ifdef DEBUG
+// #ifdef DEBUG
     printf("%s\n", friendList);
-#endif
+// #endif
 
     char res[MAX_BUFFER_SIZE];
     sprintf(res, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s", strlen(friendList), friendList);
 
-#ifdef DEBUG
+// #ifdef DEBUG
     printf("%s\n", res);
-#endif
+// #endif
 
     send(user->conn_fd, res, strlen(res), 0);
 
+
+    return;
+}
+
+void deleteFriend(User* user, char* username, char* deleteName) {
+    // configure username query
+    char text[MAX_BUFFER_SIZE];
+    bzero(text, MAX_BUFFER_SIZE);
+    sprintf(text, "Please Enter Your Username: ");
+
+    int ret = db_deletefriendship(username, deleteName);
+
+    if (ret == 0) {
+        char res[MAX_BUFFER_SIZE];
+        sprintf(res, "HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nOK");
+
+// #ifdef DEBUG
+        printf("%s\n", res);
+// #endif
+
+        send(user->conn_fd, res, strlen(res), 0);
+
+    } else {
+        char res[MAX_BUFFER_SIZE];
+        sprintf(res, "HTTP/1.1 500 INTERNAL SERVER ERROR\r\nContent-Length: 5\r\nConnection: close\r\n\r\nERROR");
+
+// #ifdef DEBUG
+        printf("%s\n", res);
+// #endif
+
+        send(user->conn_fd, res, strlen(res), 0);
+    }
+
+    return;
+}
+
+void addFriend(User* user, char* username, char* friendName) {
+    // configure username query
+    char text[MAX_BUFFER_SIZE];
+    bzero(text, MAX_BUFFER_SIZE);
+    sprintf(text, "Please Enter Your Username: ");
+
+    printf("%s %s", username, friendName);
+
+    int ret = db_addfriendship(username, friendName);
+
+    if (ret == 0) {
+        char res[MAX_BUFFER_SIZE];
+        sprintf(res, "HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nOK");
+
+// #ifdef DEBUG
+        printf("%s\n", res);
+// #endif
+
+        send(user->conn_fd, res, strlen(res), 0);
+
+    } else {
+        char res[MAX_BUFFER_SIZE];
+        sprintf(res, "HTTP/1.1 500 INTERNAL SERVER ERROR\r\nContent-Length: 5\r\nConnection: close\r\n\r\nERROR");
+
+// #ifdef DEBUG
+        printf("%s\n", res);
+// #endif
+
+        send(user->conn_fd, res, strlen(res), 0);
+    }
 
     return;
 }

@@ -20,7 +20,7 @@ export class NetworkServices {
   };
 
   static Addfriend = async (name: string, data: string) => {
-    const endpoint = new URL(`/user/${name}`, hostname).href;
+    const endpoint = new URL(`/user/add/${name}`, hostname).href;
     const response = axios.post(endpoint, data);
     return response
       .then((res) => {
