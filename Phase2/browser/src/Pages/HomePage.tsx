@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { Container, Card, Form, Row, Col, Button } from 'react-bootstrap';
+import { Container, Table, Form, Row, Col, Button } from 'react-bootstrap';
 import { NetworkServices } from "./MessageService";
 import { getCookie } from "../Utils/cookie";
 
@@ -18,34 +18,52 @@ class HomePage extends React.Component<{}, HomePageState> {
 
   componentDidMount = async () => {
     const Name = getCookie("name"); 
-    const friends: string[] | undefined = await NetworkServices.Login(Name);
-    console.log(Name, friends);
+    // var friends: string[] | undefined = await NetworkServices.Login(Name);
+    var friends: string[] = ["Hermes", "Dino", ];
+    console.log(Name, friends === undefined ? "ii" : [0]);
     if(friends){
       this.setState({ Friends: friends });
     }
+    this.setState({Name: Name});
   }
   
-  handleChange = (event: any) => {
-    this.setState({Name: event.target.value});
-  }
+  // handleChange = (event: any) => {
+  //   this.setState({Name: event.target.value});
+  // }
 
-  onSubmit = async () => {
+  // onSubmit = async () => {
+  //   if(this.state.Name){
+  //     try {
+  //       const friends: string[] | undefined = await NetworkServices.Login(this.state.Name);
+  //     } catch (e) {
+  //       console.log(e);
+  //     }
+  //     this.setState({redirect: '/home'});
+      
+  //   }
+  // }
+
+  onItemdelete = async (friend: string) => {
+    console.log(this.state.Name, friend);
     if(this.state.Name){
+      console.log(this.state.Name, friend);
       try {
-        const friends: string[] | undefined = await NetworkServices.Login(this.state.Name);
+        await NetworkServices.Deletefriend(this.state.Name, friend);
       } catch (e) {
         console.log(e);
       }
-      this.setState({redirect: '/home'});
       
     }
-  }
-
+  } 
 
   render(){
     const Name = this.state.Name;
+    const friends = this.state.Friends;
     if (this.state.redirect) {
       return <Navigate to={this.state.redirect} />;
+    }
+    if(friends === undefined){
+      return <></>
     }
     return (
     <>
@@ -54,16 +72,31 @@ class HomePage extends React.Component<{}, HomePageState> {
           <h2 className="px-2 py-2">Welcome {Name}!</h2>
         </Row>
         <Row>
-          <Card className="px-2">
-            <Card.Title>Please click on person's button to choose action</Card.Title>
-            <Card.Body>
-              <Row>
-              <Col> 
-                <Button variant="outline-primary" onClick={() => this.onSubmit()}>Submit</Button>
-              </Col>
-              </Row>
-            </Card.Body>
-          </Card>
+          <Table className="table-hover table-striped">
+            <thead>
+              Friendlist
+            </thead>
+            <tbody>
+            {friends.map((friend) => {
+                return (
+                  <tr key={friend}>
+                    <td>{friend}</td>
+                    <td>
+                      {" "}
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={async () => await this.onItemdelete(friend)}
+                      >
+                        {" "}
+                        刪除{" "}
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </Table>
         </Row>
       </Container>
     </>

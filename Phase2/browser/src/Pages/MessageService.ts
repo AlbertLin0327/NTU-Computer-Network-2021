@@ -31,4 +31,17 @@ export class NetworkServices {
         throw err.response;
       });
   };
+
+  static Deletefriend = async (name: string, data: string) => {
+    const endpoint = new URL(`/user/delete/${name}`, hostname).href;
+    const response = axios.post(endpoint, data);
+    return response
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => {
+        console.error(err);
+        throw err.response;
+      });
+  };
 }
