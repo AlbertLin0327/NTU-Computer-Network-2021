@@ -97,12 +97,14 @@ void* pthread_handler(void* data) {
 
         if (!strncmp(buffer, "GET /user/", 10)) {
             char username[MAX_BUFFER_SIZE];
+            bzero(username, MAX_BUFFER_SIZE);
             sscanf(buffer, "GET /user/%s", username);
 
             login(&userList[thread_id], username);
         
         } else if (!strncmp(buffer, "POST /user/delete/", 18)) {
             char username[MAX_BUFFER_SIZE];
+            bzero(username, MAX_BUFFER_SIZE);
             sscanf(buffer, "POST /user/delete/%s", username);
 
             char* deleteName = strstr(buffer, "\r\n\r\n") + 4;
@@ -113,6 +115,7 @@ void* pthread_handler(void* data) {
         
         } else if (!strncmp(buffer, "POST /user/add/", 15)) {
             char username[MAX_BUFFER_SIZE];
+            bzero(username, MAX_BUFFER_SIZE);
             sscanf(buffer, "POST /user/add/%s", username);
 
             char* friendName = strstr(buffer, "\r\n\r\n") + 4;
@@ -120,11 +123,49 @@ void* pthread_handler(void* data) {
             printf("%s\n", friendName);
 
             addFriend(&userList[thread_id], username, friendName);
-        }
 
+        } else if (!strncmp(buffer, "GET /chat/", 10)) {
+            char pair[MAX_BUFFER_SIZE];
+            bzero(pair, MAX_BUFFER_SIZE);
+            char from[MAX_BUFFER_SIZE], to[MAX_BUFFER_SIZE];
+            bzero(from, MAX_BUFFER_SIZE);
+            bzero(to, MAX_BUFFER_SIZE);
+           
+            sscanf(buffer, "GET /chat/%s", pair);
+
+            int breaking = 0;
+            for (int i = 0; i < strlen(pair); i++)
+                if (pair[i] == '/')
+                    breaking = i;
+            
+            strncpy(from, pair, breaking);
+            strncpy(to, pair + breaking + 1, strlen(pair) - breaking - 1);
+
+            chathistory(&userList[thread_id], from, to);
         
-    }
+        }else if (!strncmp(buffer, "POST /send/", 11)) {
+            char pair[MAX_BUFFER_SIZE];
+            bzero(pair, MAX_BUFFER_SIZE);
+            char from[MAX_BUFFER_SIZE], to[MAX_BUFFER_SIZE];
+            bzero(from, MAX_BUFFER_SIZE);
+            bzero(to, MAX_BUFFER_SIZE);
+           
+            sscanf(buffer, "POST /send/%s", pair);
 
+            int breaking = 0;
+            for (int i = 0; i < strlen(pair); i++)
+                if (pair[i] == '/')
+                    breaking = i;
+            
+            strncpy(from, pair, breaking);
+            strncpy(to, pair + breaking + 1, strlen(pair) - breaking - 1);
+
+            char* msg = strstr(buffer, "\r\n\r\n") + 4;
+
+            sendmessage(&userList[thread_id], from, to, msg);
+        
+        }
+    }
 
     // end pthread
     threadsUsed[thread_id] = false;

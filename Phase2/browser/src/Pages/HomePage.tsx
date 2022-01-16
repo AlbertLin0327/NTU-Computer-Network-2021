@@ -55,7 +55,7 @@ class HomePage extends React.Component<{}, HomePageState> {
       // setCookie("name", this.state.Name, 10);
       // setCookie("sender", this.state.Name, 10);
       // setCookie("receiver", friend, 10);
-      this.setState({redirect: '/chat' + this.state.Name + '/' + friend });
+      this.setState({redirect: '/chat/' + this.state.Name + '/' + friend });
     }
   }
 

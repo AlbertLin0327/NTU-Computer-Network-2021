@@ -180,7 +180,7 @@ int getfriend_callback(void *NotUsed, int argc, char **argv, char **azColName) {
 
 int getmessage_callback(void *NotUsed, int argc, char **argv, char **azColName) {
     // printf("%s %s %s %s", argv[1], argv[2], argv[3], argv[4]);
-    sprintf(message_list[message_cnt], "[%s_%s_%s_%s_%s],", argv[0], argv[1], argv[2], argv[3], argv[4]);
+    sprintf(message_list[message_cnt], "%sß%sß%sß%sß%s√", argv[0], argv[1], argv[2], argv[3], argv[4]);
     message_cnt++;
     // printf("1: %s\n", message_list[message_cnt - 1]);
     return 0;

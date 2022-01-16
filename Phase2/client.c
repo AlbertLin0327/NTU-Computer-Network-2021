@@ -68,7 +68,6 @@ void login() {
     // receive login message from server
     bzero(buf, MAX_BUFFER_SIZE);
     recv(svr_backend.listen_fd, buf, sizeof(buf), 0);
-    printf("%s", buf);
 
     // send username to server
     bzero(buf, MAX_BUFFER_SIZE);
@@ -130,7 +129,9 @@ int main(int argc, char** argv) {
                 char* content = strstr(buffer, "\r\n\r\n") + 4;
                 
                 sscanf(content_len, "%d", &total_len);
+#ifdef DEBUG
                 printf("%d %d\n", total_len, strlen(content));
+#endif
 
                 total_len -= strlen(content);
 
@@ -139,7 +140,9 @@ int main(int argc, char** argv) {
             send(backend_fd, buffer, strlen(buffer), 0); 
             first_pkt = false;
 
+#ifdef DEBUG
             printf("%d\n", total_len);
+#endif
            
         } while(total_len > 0);
 
@@ -149,7 +152,10 @@ int main(int argc, char** argv) {
         do{
             // first pkt
             int readlen = recv(backend_fd, buffer, sizeof(buffer), 0);
+
+#ifdef DEBUG
             printf("%s\n", buffer);
+#endif
             
             // find length
              if (first_pkt) {
@@ -164,7 +170,9 @@ int main(int argc, char** argv) {
             send(browser_fd, buffer, strlen(buffer), 0);
             first_pkt = false;
 
+#ifdef DEBUG
             printf("%s\n", buffer);
+#endif
            
         } while(total_len > 0);
 

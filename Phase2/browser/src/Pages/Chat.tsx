@@ -38,7 +38,7 @@ class Chat extends React.Component<{}, LoginPageState> {
     if(Sender && Receiver){
         var messages = await NetworkServices.GetMessage(Sender, Receiver);
         if(messages){
-            var messagesList: string[] = messages.replace('[','').replace(']','').slice(0, -1).split(',');
+            var messagesList: string[] = messages.replace('[','').replace(']','').slice(0, -1).split('√');
             var AllMessage: Message[] = [];
             messagesList.map((message) => {
                 var newM: Message = {
@@ -48,7 +48,7 @@ class Chat extends React.Component<{}, LoginPageState> {
                     type: 0,
                     Content: ""
                 };
-                var message_t = message.split('_');
+                var message_t = message.split('ß');
                 newM.Id = Number(message_t[0]);
                 newM.Sender = message_t[1];
                 newM.Receiver = message_t[2];

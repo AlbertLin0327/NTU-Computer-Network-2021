@@ -98,58 +98,114 @@ void addFriend(User* user, char* username, char* friendName) {
     return;
 }
 
-void homepage(User* user) {
+void chathistory(User* user, char* from, char* to) {
+    // configure username query
+    char text[MAX_BUFFER_SIZE];
+    bzero(text, MAX_BUFFER_SIZE);
 
-    char* list = db_getuserfriend(user->username);
+    printf("%s %s", from, to);
 
-    int sz = strlen(list);
-    char length[MAX_BUFFER_SIZE];
+    char *message = db_getusermessage(from, to);
 
-    bzero(length, sizeof(length));
-    send(user->conn_fd, length, MAX_BUFFER_SIZE, 0);
+// #ifdef DEBUG
+    printf("%s\n", message);
+// #endif
 
-    bzero(user->buf, MAX_BUFFER_SIZE);
-    recv(user->conn_fd, user->buf, MAX_BUFFER_SIZE, 0);
+    char res[MAX_BUFFER_SIZE];
+    sprintf(res, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s", strlen(message), message);
 
-    while(sz) {
+// #ifdef DEBUG
+    printf("%s\n", res);
+// #endif
 
-        bzero(user->buf, MAX_BUFFER_SIZE);
-        int readlen;
-
-#ifdef DEBUG
-        fprintf(stderr, "%d: %s", readlen, user->buf);
-#endif
-
-        if((readlen = send(user->conn_fd, user->buf, readlen, 0)) == -1) {
-            ERR_EXIT("Error in sending file");
-        }
-
-        sz -= readlen;
-    }
-
-    bzero(user->buf, MAX_BUFFER_SIZE);
-    recv(user->conn_fd, user->buf, MAX_BUFFER_SIZE, 0);
-
+    send(user->conn_fd, res, strlen(res), 0);
 }
 
-void waiting_homepage(User* user) {
-    bzero(user->buf, MAX_BUFFER_SIZE);
-    recv(user->conn_fd, user->buf, MAX_BUFFER_SIZE, 0);
+void sendmessage(User* user, char* from, char* to, char* msg) {
+    // configure username query
+    char text[MAX_BUFFER_SIZE];
+    bzero(text, MAX_BUFFER_SIZE);
 
-    if (!strncmp(user->buf, "ADD FRIEND:", 11)) {
-        char newFriend[MAX_BUFFER_SIZE];
-        strcpy(newFriend, user->buf + 11);
+    printf("%s %s %s\n", from, to, msg);
 
-        db_addfriendship(user->username, newFriend);
+    int ret = db_addmessage(from, to, 1, msg);
+
+    if (ret == 0) {
+        char res[MAX_BUFFER_SIZE];
+        sprintf(res, "HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nOK");
+
+// #ifdef DEBUG
+        printf("%s\n", res);
+// #endif
+
+        send(user->conn_fd, res, strlen(res), 0);
+
+    } else {
+        char res[MAX_BUFFER_SIZE];
+        sprintf(res, "HTTP/1.1 500 INTERNAL SERVER ERROR\r\nContent-Length: 5\r\nConnection: close\r\n\r\nERROR");
+
+// #ifdef DEBUG
+        printf("%s\n", res);
+// #endif
+
+        send(user->conn_fd, res, strlen(res), 0);
+    }
+
+    return;
+}
+
+// void homepage(User* user) {
+
+//     char* list = db_getuserfriend(user->username);
+
+//     int sz = strlen(list);
+//     char length[MAX_BUFFER_SIZE];
+
+//     bzero(length, sizeof(length));
+//     send(user->conn_fd, length, MAX_BUFFER_SIZE, 0);
+
+//     bzero(user->buf, MAX_BUFFER_SIZE);
+//     recv(user->conn_fd, user->buf, MAX_BUFFER_SIZE, 0);
+
+//     while(sz) {
+
+//         bzero(user->buf, MAX_BUFFER_SIZE);
+//         int readlen;
+
+// #ifdef DEBUG
+//         fprintf(stderr, "%d: %s", readlen, user->buf);
+// #endif
+
+//         if((readlen = send(user->conn_fd, user->buf, readlen, 0)) == -1) {
+//             ERR_EXIT("Error in sending file");
+//         }
+
+//         sz -= readlen;
+//     }
+
+//     bzero(user->buf, MAX_BUFFER_SIZE);
+//     recv(user->conn_fd, user->buf, MAX_BUFFER_SIZE, 0);
+
+// }
+
+// void waiting_homepage(User* user) {
+//     bzero(user->buf, MAX_BUFFER_SIZE);
+//     recv(user->conn_fd, user->buf, MAX_BUFFER_SIZE, 0);
+
+//     if (!strncmp(user->buf, "ADD FRIEND:", 11)) {
+//         char newFriend[MAX_BUFFER_SIZE];
+//         strcpy(newFriend, user->buf + 11);
+
+//         db_addfriendship(user->username, newFriend);
 
     
-    } else if (!strncmp(user->buf, "CHAT:", 5)) {
-        char newFriend[MAX_BUFFER_SIZE];
-        strcpy(newFriend, user->buf + 5);
+//     } else if (!strncmp(user->buf, "CHAT:", 5)) {
+//         char newFriend[MAX_BUFFER_SIZE];
+//         strcpy(newFriend, user->buf + 5);
 
         
 
-        strcpy(user->chatting, newFriend);
+//         strcpy(user->chatting, newFriend);
      
-    }
-}
+//     }
+// }
