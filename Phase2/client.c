@@ -1,5 +1,6 @@
 // Socket API file
 #include "socket-api.c"
+#include <string.h>
 
 server svr_browser, svr_cmd, svr_backend;
 User user;
@@ -100,8 +101,6 @@ int main(int argc, char** argv) {
     sscanf(argv[1], "%[^:]:%hd", ip, &port_backend);
     sscanf(argv[2], "%hd", &port_browser);
 
-    printf("%d\n", port_browser);
-
     // Initialize browser
     init_browser(port_browser);
     
@@ -116,17 +115,58 @@ int main(int argc, char** argv) {
         int browser_fd = accept(svr_browser.listen_fd, NULL, NULL);
         int backend_fd = svr_backend.listen_fd;
 
+        bool first_pkt = true;
+        int total_len = 0;  
+
+        do{
+            // first pkt
+            bzero(buffer, MAX_BUFFER_SIZE);  
+            int readlen = recv(browser_fd, buffer, sizeof(buffer), 0);
+            printf("%s\n", buffer);
+            
+            // find length
+            if (first_pkt && !strncmp(buffer, "POST", 4)) {
+                char* content_len = strstr(buffer, "Content-Length: ") + 15;
+                char* content = strstr(buffer, "\r\n\r\n") + 4;
+                
+                sscanf(content_len, "%d", &total_len);
+                printf("%d %d\n", total_len, strlen(content));
+
+                total_len -= strlen(content);
+
+            } else total_len -= readlen;
+
+            send(backend_fd, buffer, strlen(buffer), 0); 
+            first_pkt = false;
+
+            printf("%d\n", total_len);
+           
+        } while(total_len > 0);
+
+        first_pkt = true;
         bzero(buffer, MAX_BUFFER_SIZE);
-        recv(browser_fd, buffer, sizeof(buffer), 0);
-        send(backend_fd, buffer, strlen(buffer), 0); 
 
-        printf("%s\n", buffer);
+        do{
+            // first pkt
+            int readlen = recv(backend_fd, buffer, sizeof(buffer), 0);
+            printf("%s\n", buffer);
+            
+            // find length
+             if (first_pkt) {
+                char* content_len = strstr(buffer, "Content-Length: ") + 15;
+                char* content = strstr(buffer, "\r\n\r\n") + 4;
+                
+                sscanf(content_len, "%d", &total_len);
+                total_len -= strlen(content);
 
-        bzero(buffer, MAX_BUFFER_SIZE);
-        recv(backend_fd, buffer, sizeof(buffer), 0);
-        send(browser_fd, buffer, strlen(buffer), 0);
+            } else total_len -= readlen;
 
-        printf("%s\n", buffer);
+            send(browser_fd, buffer, strlen(buffer), 0);
+            first_pkt = false;
+
+            printf("%s\n", buffer);
+           
+        } while(total_len > 0);
 
     }
 }
