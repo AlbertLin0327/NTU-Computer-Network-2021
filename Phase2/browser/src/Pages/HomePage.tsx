@@ -124,7 +124,9 @@ class HomePage extends React.Component<{}, HomePageState> {
               Friendlist
             </thead>
             <tbody>
+            
             {friends.map((friend) => {
+              if(friend.length > 0){
                 return (
                   <tr key={friend}>
                     <td>{friend}</td>
@@ -152,7 +154,7 @@ class HomePage extends React.Component<{}, HomePageState> {
                     </td>
                   </tr>
                 );
-              })}
+              }})}
             </tbody>
           </Table>
         </Row>
