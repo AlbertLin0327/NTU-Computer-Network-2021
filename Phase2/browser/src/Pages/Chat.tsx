@@ -31,8 +31,10 @@ class Chat extends React.Component<{}, LoginPageState> {
   }
 
   updatedata = async () => {
-    const Sender = getCookie("sender");
-    const Receiver = getCookie("receiver");
+    var Pathname = window.location.pathname;
+    var SPname = Pathname.split('/');
+    const Sender = SPname[2];
+    const Receiver = SPname[3];
     if(Sender && Receiver){
         var messages = await NetworkServices.GetMessage(Sender, Receiver);
         if(messages){

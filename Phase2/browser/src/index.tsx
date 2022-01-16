@@ -11,8 +11,8 @@ ReactDOM.render(
     <BrowserRouter>
       <Routes>
         <Route path="/*" element={<Login />} />
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/chat" element={<Chat />} />
+        <Route path="/home/*" element={<HomePage />} />
+        <Route path="/chat/*" element={<Chat />} />
       </Routes>
     </BrowserRouter>
   </>,

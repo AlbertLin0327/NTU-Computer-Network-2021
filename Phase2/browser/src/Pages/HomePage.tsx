@@ -18,7 +18,9 @@ class HomePage extends React.Component<{}, HomePageState> {
   }
 
   componentDidMount = async () => {
-    const Name = getCookie("name"); 
+    var Pathname = window.location.pathname;
+    var SPname = Pathname.split('/');
+    const Name = SPname[2];
     var friends: string | undefined = await NetworkServices.Login(Name);
     var friendsList: string[] | undefined;
     if (friends !== undefined) {
@@ -50,10 +52,10 @@ class HomePage extends React.Component<{}, HomePageState> {
   
   onSwitchpage = async (friend: string) => {
     if(this.state.Name && friend){
-      setCookie("name", this.state.Name, 10);
-      setCookie("sender", this.state.Name, 10);
-      setCookie("receiver", friend, 10);
-      this.setState({redirect: '/chat'});
+      // setCookie("name", this.state.Name, 10);
+      // setCookie("sender", this.state.Name, 10);
+      // setCookie("receiver", friend, 10);
+      this.setState({redirect: '/chat' + this.state.Name + '/' + friend });
     }
   }
 
