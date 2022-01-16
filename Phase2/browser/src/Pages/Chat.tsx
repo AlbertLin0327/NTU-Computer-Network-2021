@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { Container, Card, Form, Row, Col, Button, Table } from 'react-bootstrap';
 import { NetworkServices } from "./MessageService";
 import { setCookie, getCookie } from "../Utils/cookie";
+import upload from './Drive';
 
 interface LoginPageState {
   Sender: string | undefined;
@@ -10,6 +11,7 @@ interface LoginPageState {
   redirect: string | undefined;
   SendMessage: string | undefined;
   SendFile: File | null;
+  SendImage?: File;
   AllMessage: Message[] | undefined;
 }
 
@@ -19,6 +21,8 @@ type Message = {
     Receiver: string;
     type: number;
     Content: string;
+    Image?: File;
+    File?: File;
 }
 
 class Chat extends React.Component<{}, LoginPageState> {
@@ -39,6 +43,7 @@ class Chat extends React.Component<{}, LoginPageState> {
     const Receiver = SPname[3];
     if(Sender && Receiver){
         var messages = await NetworkServices.GetMessage(Sender, Receiver);
+        // var messages = "";
         if(messages){
             var messagesList: string[] = messages.replace('[','').replace(']','').slice(0, -1).split('√');
             var AllMessage: Message[] = [];
@@ -56,6 +61,11 @@ class Chat extends React.Component<{}, LoginPageState> {
                 newM.Receiver = message_t[2];
                 newM.type = Number(message_t[3]);
                 newM.Content = message_t[4];
+                if(newM.type == 2){
+
+                }else if(newM.type == 3){
+
+                }
                 AllMessage.push(newM);
             })
             this.setState({AllMessage: AllMessage});
@@ -77,6 +87,22 @@ class Chat extends React.Component<{}, LoginPageState> {
     if(this.state.SendFile && this.state.Sender && this.state.Receiver){
       try {
           await NetworkServices.SendFile(this.state.Sender, this.state.Receiver, this.state.SendFile);
+      } catch (e) {
+          console.log(e);
+      }
+      await this.updatedata();
+    }
+  }
+
+  handleImageChange = (event: any) => {
+    this.setState({SendImage: event.target.files[0]});
+  }
+
+  onImageSubmit = async () => {
+    if(this.state.SendImage && this.state.Sender && this.state.Receiver){
+      await upload(this.state.SendImage);
+      try {
+          await NetworkServices.SendFile(this.state.Sender, this.state.Receiver, this.state.SendImage);
       } catch (e) {
           console.log(e);
       }
@@ -160,6 +186,19 @@ class Chat extends React.Component<{}, LoginPageState> {
             </Col>
             <Col> 
                 <Button variant="outline-primary" onClick={() => this.onFileSubmit()}>Send File</Button>
+            </Col>
+        </Row>
+        <Row>
+            <Col>
+                <Form>
+                <Form.Group controlId="formFile" className="mb-3">
+                  <Form.Label>Please select your image</Form.Label>
+                  <Form.Control type="file" onChange={(e) => this.handleImageChange(e)}/>
+                </Form.Group>
+                </Form>
+            </Col>
+            <Col> 
+                <Button variant="outline-primary" onClick={() => this.onImageSubmit()}>Send Image</Button>
             </Col>
         </Row>
         </Container>
