@@ -11,8 +11,8 @@ bool called = false;
 
 char friends_list[100][100];
 char friends_json[1000];
-char message_list[100][5][100];
-char message_json[10000];
+char message_list[100][1000];
+char message_json[100000];
 int message_cnt = 0;
 int friends_cnt = 0;
 
@@ -131,24 +131,23 @@ int db_deletefriendship(char username1[], char username2[]){
 char* db_getusermessage(char username1[], char username2[]){
     char sql[500];
     char* err_msg = 0;
-    sprintf(sql, "SELECT * FROM Message WHERE (sender = '%s' and receiver '%s') or (sender = '%s' and receiver '%s');", username1, username2, username2, username1);
+    sprintf(sql, "SELECT * FROM Message WHERE (sender = '%s' and receiver = '%s') or (sender = '%s' and receiver = '%s');", username1, username2, username2, username1);
     message_cnt = 0;
     int rc = sqlite3_exec(db, sql, getmessage_callback, 0, &err_msg);
 
     if (rc != SQLITE_OK || message_cnt == 0) {
         return ""; // No friend
     }
-
+    
+    memset(message_json, 0, sizeof(message_json));
     message_json[0] = '{';
-    for(int i = 0; i < friends_cnt; i++){
-        sprintf(friends_json + strlen(friends_json), "'%s',", friends_list[i]);
+    for(int i = 0; i < message_cnt; i++){
+        sprintf(message_json + strlen(message_json), "%s", message_list[i]);
     }
     sprintf(message_json + strlen(message_json), "}");
      
     return message_json; // Success
 }
-
-
 
 int db_addmessage(char sender[], char receiver[], int type, char content[]){
     if(!db_checkuser(sender) || !db_checkuser(receiver))
@@ -174,22 +173,22 @@ int check_callback(void *NotUsed, int argc, char **argv, char **azColName) {
 int getfriend_callback(void *NotUsed, int argc, char **argv, char **azColName) {
     sprintf(friends_list[friends_cnt], "%s", argv[0]);
     friends_cnt++;
-    printf("%s\n", friends_list[friends_cnt - 1]);
-    return 0;
-}
-
-int getmessage_callback(void *NotUsed, int argc, char **argv, char **azColName) {
-    sprintf(friends_list[friends_cnt], "%s", argv[0]);
-    friends_cnt++;
     // printf("%s\n", friends_list[friends_cnt - 1]);
     return 0;
 }
 
-// int main(void) {
-//     int rc = db_init("database.db");
-//     printf(db_checkuser("dinoo") ? "yes\n" : "NO\n");
-//     printf("%s\n", db_getuserfriend("Dino"));
-//     printf("%s\n", db_getuserfriend("Dino"));
-//     printf("%s\n", db_getuserfriend("Dino"));
-//     return 0;
-// }
+int getmessage_callback(void *NotUsed, int argc, char **argv, char **azColName) {
+    // printf("%s %s %s %s", argv[1], argv[2], argv[3], argv[4]);
+    sprintf(message_list[message_cnt], "{ 'sender': '%s', 'receiver': '%s', 'type': %s, 'message': '%s' },", argv[1], argv[2], argv[3], argv[4]);
+    message_cnt++;
+    // printf("1: %s\n", message_list[message_cnt - 1]);
+    return 0;
+}
+
+int main(void) {
+    int rc = db_init("database.db");
+    // printf("%d\n", db_addmessage("Dino", "Hermes", 1, "Good night"));
+    // printf("%s\n", db_getusermessage("Dino", "Hermes"));
+    printf("%s\n", db_getusermessage("Dino", "Hermes"));
+    return 0;
+}
