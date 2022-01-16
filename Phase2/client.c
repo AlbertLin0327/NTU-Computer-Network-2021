@@ -62,25 +62,25 @@ static void init_browser(unsigned short port) {
     return;
 }
 
-void login() {
-    char buf[MAX_BUFFER_SIZE];
+// void login() {
+//     char buf[MAX_BUFFER_SIZE];
 
-    // receive login message from server
-    bzero(buf, MAX_BUFFER_SIZE);
-    recv(svr_backend.listen_fd, buf, sizeof(buf), 0);
+//     // receive login message from server
+//     bzero(buf, MAX_BUFFER_SIZE);
+//     recv(svr_backend.listen_fd, buf, sizeof(buf), 0);
 
-    // send username to server
-    bzero(buf, MAX_BUFFER_SIZE);
-    scanf("%s", buf);
-    sprintf(user.username, "%s", buf);
-    send(svr_backend.listen_fd, buf, sizeof(buf), 0);
+//     // send username to server
+//     bzero(buf, MAX_BUFFER_SIZE);
+//     scanf("%s", buf);
+//     sprintf(user.username, "%s", buf);
+//     send(svr_backend.listen_fd, buf, sizeof(buf), 0);
 
-    return;
-}
+//     return;
+// }
 
-void homepage() {
+// void homepage() {
     
-}
+// }
 
 int main(int argc, char** argv) {
 

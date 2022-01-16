@@ -58,7 +58,6 @@ void* pthread_handler(void* data) {
     int thread_id = (int) data;
 
     printf("ACCEPT %d\n", thread_id);
-    char *msg = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello, world~";
 
     while(1){
 
