@@ -61,13 +61,16 @@ char* db_getuserfriend(char username[]){
     char sql[100];
     char* err_msg = 0;
     sprintf(sql, "SELECT Friend2 FROM Friendship WHERE Friend1 = '%s';", username);
-
+    friends_cnt = 0;
+    // bzero(friends_list, strlen(friends_list));
     int rc = sqlite3_exec(db, sql, getfriend_callback, 0, &err_msg);
 
     if (rc != SQLITE_OK || friends_cnt == 0) {
         return ""; // No friend
     }
 
+    memset(friends_json, 0, sizeof(friends_json));
+    
     friends_json[0] = '{';
     for(int i = 0; i < friends_cnt; i++){
         sprintf(friends_json + strlen(friends_json), "'%s',", friends_list[i]);
@@ -178,15 +181,15 @@ int getfriend_callback(void *NotUsed, int argc, char **argv, char **azColName) {
 int getmessage_callback(void *NotUsed, int argc, char **argv, char **azColName) {
     sprintf(friends_list[friends_cnt], "%s", argv[0]);
     friends_cnt++;
-    printf("%s\n", friends_list[friends_cnt - 1]);
+    // printf("%s\n", friends_list[friends_cnt - 1]);
     return 0;
 }
 
-int main(void) {
-    int rc = db_init("database.db");
-    printf(db_checkuser("dinoo") ? "yes\n" : "NO\n");
-    // printf("%d\n", db_deletefriendship("Albert", "Dino"));
-    printf("%d\n", db_addfriendship("H", "Dino"));
-    printf("%d\n", db_addfriendship("Dino", "Hermes"));
-    return 0;
-}
+// int main(void) {
+//     int rc = db_init("database.db");
+//     printf(db_checkuser("dinoo") ? "yes\n" : "NO\n");
+//     printf("%s\n", db_getuserfriend("Dino"));
+//     printf("%s\n", db_getuserfriend("Dino"));
+//     printf("%s\n", db_getuserfriend("Dino"));
+//     return 0;
+// }
