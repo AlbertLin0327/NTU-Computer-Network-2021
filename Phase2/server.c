@@ -61,50 +61,23 @@ void* pthread_handler(void* data) {
 
     while(1){
 
-    char buffer[MAX_BUFFER_SIZE];
-    bzero(buffer, sizeof(buffer));
+        char buffer[MAX_BUFFER_SIZE];
+        bzero(buffer, sizeof(buffer));
 
-    recv(userList[thread_id].conn_fd, buffer, sizeof(buffer), 0);
-    printf("%s\n", buffer);
-    
-    
-    char ss[MAX_BUFFER_SIZE];
-    
-    sscanf(buffer, "GET /user/%s", ss);
+        recv(userList[thread_id].conn_fd, buffer, sizeof(buffer), 0);
+        
 
-    printf("%s\n", ss);
+        if (!strncmp(buffer, "GET /user/", 10)) {
+            char username[MAX_BUFFER_SIZE];
+            sscanf(buffer, "GET /user/%s", username);
 
-    if(!db_checkuser(ss)) {
-        db_adduser(ss);
+            login(&userList[thread_id], username);
+        
+        } 
+
+        
     }
 
-    char *a = db_getuserfriend(ss);
-    printf("%s\n", a);
-    char res[MAX_BUFFER_SIZE];
-    sprintf(res, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s", strlen(a), a);
-    printf("%s\n", res);
-    send(userList[thread_id].conn_fd, res, strlen(res), 0);
-    }
-
-
-    // while (true) {
-    //     switch (userList[thread_id].state) {
-    //         case LOGIN:
-    //             login(&userList[thread_id]);
-    //             break;
-
-    //         case HOMEPAGE:
-    //             homepage(&userList[thread_id]);
-    //             break;
-
-    //         case RETREIVEDHOMEPAGE:
-    //             waiting_homepage(&userList[thread_id]);
-    //             break;
-            
-    //         default:
-    //             break;
-    //     }
-    // }
 
     // end pthread
     threadsUsed[thread_id] = false;
@@ -138,7 +111,6 @@ int main(int argc, char** argv) {
         // assign user information
         init_user(&userList[conn_fd]);
         userList[conn_fd].conn_fd = conn_fd;
-        userList[conn_fd].state = LOGIN;
 
         int param = conn_fd;
 
