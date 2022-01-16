@@ -27,6 +27,7 @@ class Chat extends React.Component<{}, LoginPageState> {
   }
 
   componentDidMount = async () => {
+    var interval = setInterval(this.updatedata, 3000);
     await this.updatedata();
   }
 
@@ -60,8 +61,8 @@ class Chat extends React.Component<{}, LoginPageState> {
         }
         this.setState({Sender, Receiver});
     }
-    
-  } 
+  }
+
   
   handleChange = (event: any) => {
     this.setState({SendMessage: event.target.value});
