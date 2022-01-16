@@ -9,6 +9,7 @@ interface LoginPageState {
   Receiver: string | undefined;
   redirect: string | undefined;
   SendMessage: string | undefined;
+  SendFile: File | null;
   AllMessage: Message[] | undefined;
 }
 
@@ -23,10 +24,11 @@ type Message = {
 class Chat extends React.Component<{}, LoginPageState> {
   constructor(props: LoginPageState) {
     super(props);
-    this.state = { Sender: undefined, Receiver: undefined, SendMessage: undefined, redirect: undefined, AllMessage: [] };
+    this.state = { Sender: undefined, Receiver: undefined, SendMessage: undefined, SendFile: null, redirect: undefined, AllMessage: [] };
   }
 
   componentDidMount = async () => {
+    var interval = setInterval(this.updatedata, 3000);
     await this.updatedata();
   }
 
@@ -60,11 +62,26 @@ class Chat extends React.Component<{}, LoginPageState> {
         }
         this.setState({Sender, Receiver});
     }
-    
-  } 
+  }
+
   
   handleChange = (event: any) => {
     this.setState({SendMessage: event.target.value});
+  }
+
+  handleFileChange = (event: any) => {
+    this.setState({SendFile: event.target.files[0]});
+  }
+
+  onFileSubmit = async () => {
+    if(this.state.SendFile && this.state.Sender && this.state.Receiver){
+      try {
+          await NetworkServices.SendFile(this.state.Sender, this.state.Receiver, this.state.SendFile);
+      } catch (e) {
+          console.log(e);
+      }
+      await this.updatedata();
+    }
   }
 
   onSubmit = async () => {
@@ -129,7 +146,20 @@ class Chat extends React.Component<{}, LoginPageState> {
                 </Form>
             </Col>
             <Col> 
-                <Button variant="outline-primary" onClick={() => this.onSubmit()}>Send</Button>
+                <Button variant="outline-primary" onClick={() => this.onSubmit()}>Send Message</Button>
+            </Col>
+        </Row>
+        <Row>
+            <Col>
+                <Form>
+                <Form.Group controlId="formFile" className="mb-3">
+                  <Form.Label>Please select your file</Form.Label>
+                  <Form.Control type="file" onChange={(e) => this.handleFileChange(e)}/>
+                </Form.Group>
+                </Form>
+            </Col>
+            <Col> 
+                <Button variant="outline-primary" onClick={() => this.onFileSubmit()}>Send File</Button>
             </Col>
         </Row>
         </Container>

@@ -71,4 +71,18 @@ export class NetworkServices {
         throw err.response;
       });
   };
+
+  static SendFile = async (sender: string, receiver: string, data: File) => {
+    const endpoint = new URL(`/send/${sender}/${receiver}`, hostname).href;
+    const response = axios.post(endpoint, data, {
+      headers: { 'Content-Type': 'multipart/form-data'  }});
+    return response
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => {
+        console.error(err);
+        throw err.response;
+    });
+  }
 }
