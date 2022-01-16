@@ -44,4 +44,31 @@ export class NetworkServices {
         throw err.response;
       });
   };
+
+  static SendMessage = async (sender: string, receiver: string, data: string) => {
+    const endpoint = new URL(`/send/${sender}/${receiver}`, hostname).href;
+    const response = axios.post(endpoint, data);
+    return response
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => {
+        console.error(err);
+        throw err.response;
+    });
+  }
+
+  static GetMessage = async (sender: string, receiver: string): Promise<string | undefined> => {
+    const endpoint = new URL(`/chat/${sender}/${receiver}`, hostname).href;
+    const response = axios.get(endpoint);
+    return response
+      .then((res) => {
+          console.log(res.data);
+        return res.data;
+      })
+      .catch((err) => {
+        console.error(err);
+        throw err.response;
+      });
+  };
 }
