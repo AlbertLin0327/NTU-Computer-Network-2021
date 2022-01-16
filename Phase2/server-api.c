@@ -2,27 +2,32 @@
 #include "database/databaseAPI.c"
 
 
-void login(User* user) {
+void login(User* user, char* username) {
 
     // configure username query
     char text[MAX_BUFFER_SIZE];
     bzero(text, MAX_BUFFER_SIZE);
     sprintf(text, "Please Enter Your Username: ");
 
-    // send username query to server
-    send(user->conn_fd, text, MAX_BUFFER_SIZE, 0);
+    if(!db_checkuser(username)) {
+        db_adduser(username);
+    }
 
-    // recieve username data
-    bzero(text, MAX_BUFFER_SIZE);
-    recv(user->conn_fd, text, MAX_BUFFER_SIZE, 0);
+    char *friendList = db_getuserfriend(username);
 
 #ifdef DEBUG
-    printf("%s\n", text);
+    printf("%s\n", friendList);
 #endif
 
-    // configure username and state
-    strcpy(user->username, text);
-    user->state = HOMEPAGE;
+    char res[MAX_BUFFER_SIZE];
+    sprintf(res, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s", strlen(friendList), friendList);
+
+#ifdef DEBUG
+    printf("%s\n", res);
+#endif
+
+    send(user->conn_fd, res, strlen(res), 0);
+
 
     return;
 }
@@ -59,7 +64,6 @@ void homepage(User* user) {
     bzero(user->buf, MAX_BUFFER_SIZE);
     recv(user->conn_fd, user->buf, MAX_BUFFER_SIZE, 0);
 
-    user->state = RETREIVEDHOMEPAGE;
 }
 
 void waiting_homepage(User* user) {
@@ -72,7 +76,6 @@ void waiting_homepage(User* user) {
 
         db_addfriendship(user->username, newFriend);
 
-        user->state = HOMEPAGE;
     
     } else if (!strncmp(user->buf, "CHAT:", 5)) {
         char newFriend[MAX_BUFFER_SIZE];
@@ -81,6 +84,6 @@ void waiting_homepage(User* user) {
         
 
         strcpy(user->chatting, newFriend);
-        user->state = CHAT;
+     
     }
 }

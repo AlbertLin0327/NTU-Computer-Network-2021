@@ -19,6 +19,7 @@ class HomePage extends React.Component<{}, HomePageState> {
   componentDidMount = async () => {
     const Name = getCookie("name"); 
     const friends: string[] | undefined = await NetworkServices.Login(Name);
+    console.log(Name, friends);
     if(friends){
       this.setState({ Friends: friends });
     }
