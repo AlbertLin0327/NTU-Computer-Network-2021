@@ -21,15 +21,15 @@ class Login extends React.Component<{}, LoginPageState> {
 
   onSubmit = async () => {
     if(this.state.Name){
-      setCookie("name", this.state.Name, 10);
-      this.setState({redirect: '/home'});
+      // setCookie("name", this.state.Name, 10);
+      this.setState({redirect: '/home/' + this.state.Name});
     }
   }
 
 
   render(){
     if (this.state.redirect) {
-      return <Navigate to={this.state.redirect} />;
+      return <Navigate to={this.state.redirect}/>;
     }
     return (
       <>
