@@ -7,12 +7,14 @@
 int check_callback(void *NotUsed, int argc, char **argv, char **azColName);
 int getfriend_callback(void *NotUsed, int argc, char **argv, char **azColName);
 int getmessage_callback(void *NotUsed, int argc, char **argv, char **azColName);
+int getfile_callback(void *NotUsed, int argc, char **argv, char **azColName);
 bool called = false;
 
 char friends_list[100][100];
 char friends_json[1000];
 char message_list[100][1000];
 char message_json[100000];
+char path[1000];
 int message_cnt = 0;
 int friends_cnt = 0;
 
@@ -166,6 +168,18 @@ int db_addmessage(char sender[], char receiver[], int type, char content[]){
     return 0; 
 }
 
+char* db_getfile(int id){
+    char sql[1000];
+    char* err_msg = 0;
+    sprintf(sql, "SELECT content FROM Message WHERE id = %d;", id);
+    memset(path, 0, sizeof(path));
+    int rc = sqlite3_exec(db, sql, getfile_callback, 0, &err_msg);
+    if (rc != SQLITE_OK) {
+        return "";
+    }
+    return path; 
+}
+
 int check_callback(void *NotUsed, int argc, char **argv, char **azColName) {
     called = true;
     return 0;
@@ -186,10 +200,16 @@ int getmessage_callback(void *NotUsed, int argc, char **argv, char **azColName) 
     return 0;
 }
 
+int getfile_callback(void *NotUsed, int argc, char **argv, char **azColName) {
+    sprintf(path, "%s", argv[0]);
+    return 0;
+}
+
 // int main(void) {
 //     int rc = db_init("database.db");
 //     // printf("%d\n", db_addmessage("Dino", "Hermes", 1, "Good night"));
 //     // printf("%s\n", db_getusermessage("Dino", "Hermes"));
-//     printf("%s\n", db_getusermessage("Dino", "Hermes"));
+//     printf("%s\n", db_getfile(1));
+//     printf("%s\n", db_getfile(2));
 //     return 0;
 // }

@@ -1,32 +1,21 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { Container, Card, Form, Row, Col, Button, Table } from 'react-bootstrap';
+import { Container, Form, Row, Col, Button, Table } from 'react-bootstrap';
 import { NetworkServices } from "./MessageService";
-import { setCookie, getCookie } from "../Utils/cookie";
 import upload from './Drive';
 
-interface LoginPageState {
-  Sender: string | undefined;
-  Receiver: string | undefined;
-  redirect: string | undefined;
-  SendMessage: string | undefined;
-  SendFile: File | null;
-  SendImage?: File;
-  AllMessage: Message[] | undefined;
-}
+// interface LoginPageState {
+//   Sender: string | undefined;
+//   Receiver: string | undefined;
+//   redirect: string | undefined;
+//   SendMessage: string | undefined;
+//   SendFile: File | null;
+//   SendImage?: File;
+//   AllMessage: Message[] | undefined;
+// }
 
-type Message = {
-    Id: number;
-    Sender: string;
-    Receiver: string;
-    type: number;
-    Content: string;
-    Image?: File;
-    File?: File;
-}
-
-class Chat extends React.Component<{}, LoginPageState> {
-  constructor(props: LoginPageState) {
+class Chat extends React.Component {
+  constructor(props) {
     super(props);
     this.state = { Sender: undefined, Receiver: undefined, SendMessage: undefined, SendFile: null, redirect: undefined, AllMessage: [] };
   }
@@ -45,10 +34,10 @@ class Chat extends React.Component<{}, LoginPageState> {
         var messages = await NetworkServices.GetMessage(Sender, Receiver);
         // var messages = "";
         if(messages){
-            var messagesList: string[] = messages.replace('[','').replace(']','').slice(0, -1).split('√');
-            var AllMessage: Message[] = [];
+            var messagesList = messages.replace('[','').replace(']','').slice(0, -1).split('√');
+            var AllMessage = [];
             messagesList.map((message) => {
-                var newM: Message = {
+                var newM = {
                     Id: -1,
                     Sender: "",
                     Receiver: "",
@@ -61,9 +50,9 @@ class Chat extends React.Component<{}, LoginPageState> {
                 newM.Receiver = message_t[2];
                 newM.type = Number(message_t[3]);
                 newM.Content = message_t[4];
-                if(newM.type == 2){
+                if(newM.type === 2){
 
-                }else if(newM.type == 3){
+                }else if(newM.type === 3){
 
                 }
                 AllMessage.push(newM);
@@ -75,11 +64,11 @@ class Chat extends React.Component<{}, LoginPageState> {
   }
 
   
-  handleChange = (event: any) => {
+  handleChange = (event) => {
     this.setState({SendMessage: event.target.value});
   }
 
-  handleFileChange = (event: any) => {
+  handleFileChange = (event) => {
     this.setState({SendFile: event.target.files[0]});
   }
 
@@ -94,7 +83,7 @@ class Chat extends React.Component<{}, LoginPageState> {
     }
   }
 
-  handleImageChange = (event: any) => {
+  handleImageChange = (event) => {
     this.setState({SendImage: event.target.files[0]});
   }
 

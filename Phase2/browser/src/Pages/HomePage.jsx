@@ -2,17 +2,9 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import { Container, Table, Form, Row, Col, Button } from 'react-bootstrap';
 import { NetworkServices } from "./MessageService";
-import { setCookie, getCookie } from "../Utils/cookie";
 
-interface HomePageState {
-  Name: string | undefined;
-  redirect: string | undefined;
-  Friends: string[] | undefined;
-  Newfriend: string | undefined;
-}
-
-class HomePage extends React.Component<{}, HomePageState> {
-  constructor(props: any) {
+class HomePage extends React.Component {
+  constructor(props) {
     super(props);
     this.state = { Name: undefined, redirect: undefined, Friends: undefined, Newfriend: undefined };
   }
@@ -21,8 +13,8 @@ class HomePage extends React.Component<{}, HomePageState> {
     var Pathname = window.location.pathname;
     var SPname = Pathname.split('/');
     const Name = SPname[2];
-    var friends: string | undefined = await NetworkServices.Login(Name);
-    var friendsList: string[] | undefined;
+    var friends = await NetworkServices.Login(Name);
+    var friendsList;
     if (friends !== undefined) {
         friendsList = friends.replace('[','').replace(']','').slice(0, -1).split(',');
         console.log('Hi', Name, friendsList);
@@ -37,8 +29,8 @@ class HomePage extends React.Component<{}, HomePageState> {
   Updatedata = async () => {
     const Name = this.state.Name;
     if(Name) 
-      var friends: string | undefined = await NetworkServices.Login(Name);
-    var friendsList: string[] | undefined;
+      var friends = await NetworkServices.Login(Name);
+    var friendsList;
     if (friends !== undefined) {
         friendsList = friends.replace('[','').replace(']','').slice(0, -1).split(',');
         console.log('Hi', Name, friendsList);
@@ -50,7 +42,7 @@ class HomePage extends React.Component<{}, HomePageState> {
     this.setState({Name: Name});
   }
   
-  onSwitchpage = async (friend: string) => {
+  onSwitchpage = async (friend) => {
     if(this.state.Name && friend){
       // setCookie("name", this.state.Name, 10);
       // setCookie("sender", this.state.Name, 10);
@@ -59,7 +51,7 @@ class HomePage extends React.Component<{}, HomePageState> {
     }
   }
 
-  handleChange = (event: any) => {
+  handleChange = (event) => {
     this.setState({Newfriend: event.target.value});
   }
 
@@ -75,7 +67,7 @@ class HomePage extends React.Component<{}, HomePageState> {
     }
   }
 
-  onItemdelete = async (friend: string) => {
+  onItemdelete = async (friend) => {
     // console.log(this.state.Name, friend);
     if(this.state.Name){
       console.log(this.state.Name, friend);

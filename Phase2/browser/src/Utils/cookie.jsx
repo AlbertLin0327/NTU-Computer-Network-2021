@@ -1,4 +1,4 @@
-const setCookie = (cname : string, cvalue : string | undefined, exdays : number) => {
+const setCookie = (cname , cvalue , exdays) => {
     var d = new Date();
     d.setTime(d.getTime() + (exdays*60*1000));
     //How many minutes
@@ -16,7 +16,7 @@ const deleteCookie = () => {
   }
 };
 
-const getCookie = (cname: string) => {
+const getCookie = (cname) => {
   var name = cname + "=";
   var decodedCookie = decodeURIComponent(document.cookie);
   var ca = decodedCookie.split(";");

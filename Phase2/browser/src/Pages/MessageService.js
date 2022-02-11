@@ -1,10 +1,9 @@
 import axios from "axios";
-import IUser from './User';
 
 const hostname = process.env.REACT_APP_BACKEND_HOSTNAME;
 
 export class NetworkServices {
-  static Login = async (name: string): Promise<string | undefined> => {
+  static Login = async (name) => {
     const endpoint = new URL(`/user/${name}`, hostname).href;
     const response = axios.get(endpoint);
     return response
@@ -18,7 +17,7 @@ export class NetworkServices {
       });
   };
 
-  static Addfriend = async (name: string, data: string) => {
+  static Addfriend = async (name, data) => {
     const endpoint = new URL(`/user/add/${name}`, hostname).href;
     const response = axios.post(endpoint, data);
     return response
@@ -31,7 +30,7 @@ export class NetworkServices {
       });
   };
 
-  static Deletefriend = async (name: string, data: string) => {
+  static Deletefriend = async (name, data) => {
     const endpoint = new URL(`/user/delete/${name}`, hostname).href;
     const response = axios.post(endpoint, data);
     return response
@@ -44,7 +43,7 @@ export class NetworkServices {
       });
   };
 
-  static SendMessage = async (sender: string, receiver: string, data: string) => {
+  static SendMessage = async (sender, receiver, data) => {
     const endpoint = new URL(`/send/${sender}/${receiver}`, hostname).href;
     const response = axios.post(endpoint, data);
     return response
@@ -57,7 +56,7 @@ export class NetworkServices {
     });
   }
 
-  static GetMessage = async (sender: string, receiver: string): Promise<string | undefined> => {
+  static GetMessage = async (sender, receiver) => {
     const endpoint = new URL(`/chat/${sender}/${receiver}`, hostname).href;
     const response = axios.get(endpoint);
     return response
@@ -71,7 +70,7 @@ export class NetworkServices {
       });
   };
 
-  static SendFile = async (sender: string, receiver: string, data: File) => {
+  static SendFile = async (sender, receiver, data) => {
     const endpoint = new URL(`/file/${sender}/${receiver}`, hostname).href;
     const response = axios.post(endpoint, data, {
       headers: { 'Content-Type': 'multipart/form-data'  }});
@@ -85,7 +84,7 @@ export class NetworkServices {
     });
   }
 
-  static SendImage = async (sender: string, receiver: string, data: File) => {
+  static SendImage = async (sender, receiver, data) => {
     const endpoint = new URL(`/img/${sender}/${receiver}`, hostname).href;
     const response = axios.post(endpoint, data, {
       headers: { 'Content-Type': 'multipart/form-data'  }});
@@ -99,7 +98,7 @@ export class NetworkServices {
     });
   }
 
-  static GetImage = async (id: number): Promise<string | undefined> => {
+  static GetImage = async (id) => {
     const endpoint = new URL(`/img/${id}`, hostname).href;
     const response = axios.get(endpoint);
     return response
@@ -113,7 +112,7 @@ export class NetworkServices {
       });
   };
 
-  static GetFile = async (id: number): Promise<string | undefined> => {
+  static GetFile = async (id) => {
     const endpoint = new URL(`/file/${id}`, hostname).href;
     const response = axios.get(endpoint);
     return response

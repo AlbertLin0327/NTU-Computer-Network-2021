@@ -3,23 +3,20 @@ import { Navigate } from "react-router-dom";
 import { Container, Card, Form, Row, Col, Button } from 'react-bootstrap';
 import { NetworkServices } from "./MessageService";
 import { setCookie } from "../Utils/cookie";
+import Savetoworkspace from "./Workstation";
 
-interface LoginPageState {
-  Name: string | undefined;
-  redirect: string | undefined;
-}
-
-class Login extends React.Component<{}, LoginPageState> {
-  constructor(props: LoginPageState) {
+class Login extends React.Component {
+  constructor(props) {
     super(props);
     this.state = { Name: undefined, redirect: undefined };
   }
   
-  handleChange = (event: any) => {
+  handleChange = (event) => {
     this.setState({Name: event.target.value});
   }
 
   onSubmit = async () => {
+    await console.log(Savetoworkspace());
     if(this.state.Name){
       // setCookie("name", this.state.Name, 10);
       this.setState({redirect: '/home/' + this.state.Name});
